@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\GIT\Sever\Server_IOCP\x64\Debug\Client_IOCP.exe</FullPath>
+      <FullPath>D:\GIT\Sever\IOCP\x64\Debug\Client_IOCP.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

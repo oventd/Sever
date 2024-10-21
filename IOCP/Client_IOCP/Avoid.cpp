@@ -6,6 +6,7 @@
 #include <stdbool.h> 
 #include <ctime>
 #include "Render.cpp"
+#include <cstdint>
 #pragma warning(disable:4996)
 
 #pragma once
@@ -43,15 +44,94 @@ struct cursor
 {
 	int by, by_last;
 	int cx, cy;
+	uint16_t value1 = 0x0000;
 };
 
 struct game_source
 {
 	int score, score_ptf;
-	int diff, life;
+	int diff;
 	int begin_menu, menu_change, start_re;
 	char diff_ch[5];
 };
+
+class Player {
+private:
+	int x;           // Player's current X position
+	int y;           // Player's current Y position
+	const char* shape;   // Player's shape for rendering
+	const char* hitShape = "※";
+	uint16_t color;      // Player's color
+	int life;       // Player's remaining lives
+	bool isDead;     // Player's dead status
+	
+
+public:
+	Render *render1;
+
+	Player(int startX, int startY, const char* playerShape, uint16_t playerColor, int startLife)
+		: x(startX), y(startY), shape(playerShape), color(playerColor), life(startLife), isDead(false) {
+		render1 = new Render();
+	}
+
+	// Method to render the player at their current position
+	void render() const {
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+		render1->printAt(shape, x, y);
+	}
+
+	// Move the player based on key input
+	void move() {
+		render1->setClear(x, y);
+		register int direction;
+		direction = _getch();
+
+		switch (direction) {
+		case LEFT:
+			if (x > 0) x -= 2;
+			break;
+		case RIGHT:
+			if (x < 19) x += 2;
+			break;
+		}
+		
+	}
+
+	// Check if the player is dead
+	bool isHit(int fallingObjX, int fallingObjY) {
+		// If the player's position matches the falling object's position, they are dead
+		if (x == fallingObjX && y == fallingObjY) {
+			life--;
+			if (life <= 0) {
+				isDead = true;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	void heal() {
+		life++;
+		GREEN render1->printAt(shape, x, y);
+	}
+
+	void damage() {
+		life--;
+		RED render1->printAt(hitShape, x, y);
+	}
+
+	// Getters
+	int getX() const { return x; }
+	int getY() const { return y; }
+	bool getIsDead() const { return isDead; }
+	int getLife() const { return life; }
+
+	// Setters
+	void setX(int newX) { x = newX; }
+	void setY(int newY) { y = newY; }
+	void setLives(int newLives) { life = newLives; }
+};
+
 
 class Fall {
 protected:
@@ -205,6 +285,7 @@ private:
 	int j_count = 0;
 	int death_time = -5;
 	Render render;
+	Fall* fallObjects;
 
 	int map[2][20][12] =
 	{ {
@@ -686,56 +767,63 @@ public:
 		game_source1.start_re = 1;
 	}
 
-	void updateGameSideInfo() {
+	void updateGameSideInfo(Player player) {
 		gotoxy(35, 6);
 
 		LIGHT_GREEN printf("%-4d", game_source1.score);
 		gotoxy(35, 8);
 
-		RED printf("%d", game_source1.life);
+		RED printf("%d", player.getLife());
 		gotoxy(48, 26);
 	}
 
-	void checkPlayerLife() {
+	void checkPlayerLife(Player player) {
 		if (death_time + 15 < currentTime) {
-			int player_death_status_razer = player_dead(&razer_ran, &razer_n, 0, &cursor1.cx, &cursor1.cy);
-			int player_death_status_heart = player_dead(&heart_ran, &heart_n, 1, &cursor1.cx, &cursor1.cy);
+			//heart hit
+			if (player.isHit(heart_ran, heart_n) == 1)
+			{
+				player.heal();
+				death_time = currentTime - 20;
+				return;
+			}
+
+			//razer hit
+			int player_death_status_star = 0;
+			if (player.isHit(razer_ran, razer_n) == 1) {
+				player_death_status_star++;
+			}
 			for (int j = 0; j < 20; j++)
 			{
-				int enemy_death_status = player_dead(&ran[j], &n[j], 0, &cursor1.cx, &cursor1.cy);
-				enemy_death_status += player_death_status_razer;
-
-				if (player_death_status_heart == 1)
-				{
-					game_source1.life++;
-					death_time = currentTime - 20;
+				if (player_death_status_star != 0)
 					break;
+
+				player_death_status_star = player.isHit(ran[j], n[j]);
+
+			}
+			if (player_death_status_star == 1)
+			{
+				if (player.getLife() == 0)
+				{
+					return;
 				}
 
-				if (enemy_death_status == 1)
+				else
 				{
-					if (game_source1.life == 0)
-					{
-						break;
-					}
-
-					else
-					{
-						game_source1.life--;
-						game_source1.score -= 5;
-						death_time = currentTime;
-						break;
-					}
+					player.damage();
+					game_source1.score -= 5;
+					death_time = currentTime;
+					return;
 				}
 			}
 		}
 	}
+	
 	void initialize() {
 		razer_n = 1; razer_ran; razer_switch = 0; razer_index = 0;
 		heart_n = 1; heart_ran; heart_switch = 0;
 		j_count = 0;
 		death_time = -5;
-		cursor1.by = 17, cursor1.cx = 12, cursor1.cy = 18, game_source1.score = 0, game_source1.life = 5, game_source1.start_re = 0, game_source1.begin_menu = 0;
+		cursor1.by = 17, cursor1.cx = 12, cursor1.cy = 18, game_source1.score = 0,  game_source1.start_re = 0, game_source1.begin_menu = 0;
 		for (int i = 0; i < 20; i++)
 			n[i] = 1;
 		for (int i = 0; i < 19; i++)
@@ -782,7 +870,7 @@ public:
 		game_source1 = { 0,1000,0,5,0,0,0,"초급" };
 
 
-		system("title 똥 피하기");
+		system("title 별 피하기");
 		system("mode con: cols=50 lines=27");
 
 		srand(time(NULL));
@@ -791,6 +879,9 @@ public:
 		{		
 			Menu();
 			initialize();
+			Player player1(16, 18, "옷", 0x0009, 5);
+			Player player2(8, 18, "옷", 0x000c, 5);
+
 			difficultSet();
 
 			gotoxy(0, 0);
@@ -808,7 +899,9 @@ public:
 				Sleep(sleep_num);
 
 				if (_kbhit())
-					move(&cursor1.cx, &cursor1.cy);
+					player1.move();
+
+
 
 				if (currentTime % 100 == 0)
 				{
@@ -839,15 +932,17 @@ public:
 					star(&n[j], &ran[j], &razer_ran, &heart_ran, &cursor1.cx, &cursor1.cy, &game_source1.score);
 				}
 
-				checkPlayerLife();
+				player1.render();
+				player2.render();
 
-				updateGameSideInfo();
+				checkPlayerLife(player1);
 
+				updateGameSideInfo(player1);
 
 				if (game_source1.score > game_source1.score_ptf)//승리조건 
 					break;
 
-				else if (game_source1.life == 0)//패배조건 
+				else if (player1.getLife() == 0)//패배조건 
 					break;
 
 			}
@@ -855,7 +950,7 @@ public:
 			if (game_source1.score > game_source1.score_ptf)
 				win();
 			
-			else if (game_source1.life == 0 && game_source1.score < game_source1.score_ptf)
+			else if (player1.getLife() == 0 && game_source1.score < game_source1.score_ptf)
 				lose();
 		}
 
