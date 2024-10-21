@@ -60,13 +60,15 @@ private:
 	int x;           // Player's current X position
 	int y;           // Player's current Y position
 	const char* shape;   // Player's shape for rendering
-	const char* hitShape = "¡Ø";
+	const char* hitShape = "â€»";
 	uint16_t color;      // Player's color
-	int life;       // Player's remaining lives
+	int hitTime;
+	
 	bool isDead;     // Player's dead status
 	
 
 public:
+	int life;       // Player's remaining lives
 	Render *render1;
 
 	Player(int startX, int startY, const char* playerShape, uint16_t playerColor, int startLife)
@@ -135,11 +137,11 @@ public:
 
 class Fall {
 protected:
-	int position_x;   // X ÁÂÇ¥
-	int position_y;   // Y ÁÂÇ¥ (¶³¾îÁö´Â À§Ä¡)
-	int cursor_x;     // Ä¿¼­ X ÁÂÇ¥
-	int cursor_y;     // Ä¿¼­ Y ÁÂÇ¥
-	int game_score;   // °ÔÀÓ Á¡¼ö
+	int position_x;   // X ì¢Œí‘œ
+	int position_y;   // Y ì¢Œí‘œ (ë–¨ì–´ì§€ëŠ” ìœ„ì¹˜)
+	int cursor_x;     // ì»¤ì„œ X ì¢Œí‘œ
+	int cursor_y;     // ì»¤ì„œ Y ì¢Œí‘œ
+	int game_score;   // ê²Œì„ ì ìˆ˜
 
 	const char* shape;
 
@@ -151,11 +153,11 @@ public:
 		position_y = 1;
 	}
 
-	virtual void fallStep() = 0; // ÀÚ½Ä Å¬·¡½º¿¡¼­ ±¸ÇöÇÒ ÇÔ¼ö
+	virtual void fallStep() = 0; // ìì‹ í´ë˜ìŠ¤ì—ì„œ êµ¬í˜„í•  í•¨ìˆ˜
 
 	virtual void resetPosition() {
 		clearPreviousPosition();
-		BLUE_GREEN render.printAt("¿ô", cursor_x, cursor_y);
+		BLUE_GREEN render.printAt("ì›ƒ", cursor_x, cursor_y);
 		position_y = 1;
 	}
 
@@ -210,7 +212,7 @@ public:
 //				for (int i = 1; i < 19; i++) {
 //					if (i % 2 == 1) {
 //						gotoxy(position_x, i);
-//						RED printf("¦­");
+//						RED printf("â”ƒ");
 //					}
 //				}
 //			}
@@ -218,7 +220,7 @@ public:
 //		else if (index >= 11) {
 //			if (position_y < 19) {
 //				gotoxy(position_x, position_y);
-//				RED printf("¡á");
+//				RED printf("â– ");
 //				position_y++;
 //			}
 //
@@ -235,7 +237,7 @@ public:
 //class Star : public Fall {
 //public:
 //	Star(int cx, int cy, int score) : Fall(cx, cy, score) {
-//		shape = "¡Ú";
+//		shape = "â˜…";
 //	}
 //
 //	void fallStep() override {
@@ -263,7 +265,7 @@ public:
 //		}
 //
 //		updatePosition();
-//		GREEN printf("¢¾");
+//		GREEN printf("â™¥");
 //
 //		if (position_y == 19) {
 //			resetPosition();
@@ -355,9 +357,9 @@ public:
 				case 0:
 					printf("  "); break;
 				case 1:
-					PLUM printf("¡à"); break;
+					PLUM printf("â–¡"); break;
 				case 2:
-					YELLOW printf("¢Æ"); break;
+					YELLOW printf("â–’"); break;
 				}
 			}
 			putchar('\n');
@@ -386,7 +388,7 @@ public:
 					if (i % 2 == 1) {
 						gotoxy(*razer_ran, i);
 
-						RED printf("¦­");
+						RED printf("â”ƒ");
 					}
 				}
 			}
@@ -397,12 +399,12 @@ public:
 
 			{
 				gotoxy(*razer_ran, *razer_n);
-				RED printf("¡á");
+				RED printf("â– ");
 				(*razer_n)++;
 			}
 			if (*razer_n >= 19) {
 				gotoxy(*razer_ran, *razer_n - 1);
-				RED printf("¡á");
+				RED printf("â– ");
 			}
 
 			if (*razer_index > 24)
@@ -414,7 +416,7 @@ public:
 				}
 				gotoxy(*cursor1cx, *cursor1cy);
 
-				BLUE_GREEN printf("%s", "¿ô");
+				BLUE_GREEN printf("%s", "ì›ƒ");
 
 				*razer_n = 1;
 
@@ -454,7 +456,7 @@ public:
 				printf("  ");
 			}
 			gotoxy(*ran, *n);
-			YELLOW printf("¡Ú");
+			YELLOW printf("â˜…");
 			(*n)++;
 		}
 
@@ -465,7 +467,7 @@ public:
 
 			gotoxy(*cursor1cx, *cursor1cy);
 
-			BLUE_GREEN printf("%s", "¿ô");
+			BLUE_GREEN printf("%s", "ì›ƒ");
 
 			*n = 1;
 
@@ -474,7 +476,7 @@ public:
 		gotoxy(48, 26);
 	}
 
-	void heart(int* heart_n, int* heart_ran, int* razer_ran, int* heart_switch, int* cursor1cx, int* cursor1cy, int* game_source1score) //±èµµÈÆ ±â´É ÇÔ¼ö
+	void heart(int* heart_n, int* heart_ran, int* razer_ran, int* heart_switch, int* cursor1cx, int* cursor1cy, int* game_source1score) //ê¹€ë„í›ˆ ê¸°ëŠ¥ í•¨ìˆ˜
 	{
 		if (*heart_n == 1) {
 			int do_switch = 0;
@@ -496,7 +498,7 @@ public:
 			}
 
 			gotoxy(*heart_ran, *heart_n);
-			GREEN printf("¢¾");
+			GREEN printf("â™¥");
 
 			(*heart_n)++;
 		}
@@ -507,7 +509,7 @@ public:
 			printf("  ");
 
 			gotoxy(*cursor1cx, *cursor1cy);
-			BLUE_GREEN printf("%s", "¿ô");
+			BLUE_GREEN printf("%s", "ì›ƒ");
 			*heart_n = 1;
 			*game_source1score += 5;
 			*heart_switch = 0;
@@ -523,15 +525,15 @@ public:
 		switch (kb)
 		{
 		case LEFT:
-			if (map[0][*cursor1cy][*cursor1cx / 2 - 1] == 0)//ÀÌµ¿ÇÒ À§Ä¡¿¡ ¹è¿­ÀÌ ÀÖ´Ù.
-				//ÀÌµ¿ÇÒ À§Ä¡ = ¹è¿­°ªÀÌ´Ï Ãæµ¹Á¶°ÇµûÁø´Ù. 
+			if (map[0][*cursor1cy][*cursor1cx / 2 - 1] == 0)//ì´ë™í•  ìœ„ì¹˜ì— ë°°ì—´ì´ ìˆë‹¤.
+				//ì´ë™í•  ìœ„ì¹˜ = ë°°ì—´ê°’ì´ë‹ˆ ì¶©ëŒì¡°ê±´ë”°ì§„ë‹¤. 
 			{
-				gotoxy(*cursor1cx, *cursor1cy);//ÇöÀç Ä³¸¯ÅÍ·Î Ä¿¼­ÀÌµ¿ 
-				printf("  ");//Áö¿ì±â 
-				*cursor1cx -= 2;//¹æÇâÅ°µû¶ó Ä¿¼­ °ª º¯°æ 
-				gotoxy(*cursor1cx, *cursor1cy);//Ä¿¼­ ÀÌµ¿ 
-				BLUE_GREEN printf("%s", "¿ô");
-				gotoxy(48, 26);//Ä¿¼­ ³»º¸³»±â 
+				gotoxy(*cursor1cx, *cursor1cy);//í˜„ì¬ ìºë¦­í„°ë¡œ ì»¤ì„œì´ë™ 
+				printf("  ");//ì§€ìš°ê¸° 
+				*cursor1cx -= 2;//ë°©í–¥í‚¤ë”°ë¼ ì»¤ì„œ ê°’ ë³€ê²½ 
+				gotoxy(*cursor1cx, *cursor1cy);//ì»¤ì„œ ì´ë™ 
+				BLUE_GREEN printf("%s", "ì›ƒ");
+				gotoxy(48, 26);//ì»¤ì„œ ë‚´ë³´ë‚´ê¸° 
 			}
 			break;
 
@@ -542,7 +544,7 @@ public:
 				printf("  ");
 				*cursor1cx += 2;
 				gotoxy(*cursor1cx, *cursor1cy);
-				BLUE_GREEN printf("%s", "¿ô");
+				BLUE_GREEN printf("%s", "ì›ƒ");
 				gotoxy(48, 26);
 			}
 			break;
@@ -558,16 +560,16 @@ public:
 	{
 		LIGHT_GREEN
 			YELLOW
-			printf("¢Æ   ¢Æ   ¢Æ  ¢Æ¢Æ¢Æ¢Æ¢Æ¢Æ ¢Æ     ¢Æ¢Æ       ¢Æ¢Æ¢Æ¢Æ¢Æ¢Æ ¢Æ¢Æ\n");
-		printf("¢Æ¢Æ¢Æ¢Æ¢Æ ¢Æ¢Æ¢Æ   ¢Æ  ¢Æ  ¢Æ          ¢Æ       ¢Æ  ¢Æ¢Æ\n");
-		printf("¢Æ   ¢Æ   ¢Æ   ¢Æ  ¢Æ  ¢Æ   ¢Æ¢Æ¢Æ¢Æ¢Æ¢Æ ¢Æ      ¢Æ   ¢Æ¢Æ\n");
-		printf("¢Æ¢Æ¢Æ¢Æ¢Æ ¢Æ¢Æ¢Æ  ¢Æ¢Æ¢Æ¢Æ¢Æ  ¢Æ          ¢Æ     ¢Æ    ¢Æ¢Æ\n");
-		printf("        ¢Æ         ¢Æ    ¢Æ¢Æ¢Æ¢Æ  ¢Æ¢Æ¢Æ¢Æ       ¢Æ¢Æ\n");
-		printf("    ¢Æ¢Æ¢Æ¢Æ¢Æ         ¢Æ    ¢Æ  ¢Æ  ¢Æ          ¢Æ¢Æ\n");
-		printf("        ¢Æ              ¢Æ¢Æ¢Æ¢Æ  ¢Æ               \n");
-		printf("    ¢Æ¢Æ¢Æ¢Æ¢Æ                          \n");
-		printf("    ¢Æ                              \n");
-		printf("    ¢Æ¢Æ¢Æ¢Æ¢Æ                           \n");
+			printf("â–’   â–’   â–’  â–’â–’â–’â–’â–’â–’ â–’     â–’â–’       â–’â–’â–’â–’â–’â–’ â–’â–’\n");
+		printf("â–’â–’â–’â–’â–’ â–’â–’â–’   â–’  â–’  â–’          â–’       â–’  â–’â–’\n");
+		printf("â–’   â–’   â–’   â–’  â–’  â–’   â–’â–’â–’â–’â–’â–’ â–’      â–’   â–’â–’\n");
+		printf("â–’â–’â–’â–’â–’ â–’â–’â–’  â–’â–’â–’â–’â–’  â–’          â–’     â–’    â–’â–’\n");
+		printf("        â–’         â–’    â–’â–’â–’â–’  â–’â–’â–’â–’       â–’â–’\n");
+		printf("    â–’â–’â–’â–’â–’         â–’    â–’  â–’  â–’          â–’â–’\n");
+		printf("        â–’              â–’â–’â–’â–’  â–’               \n");
+		printf("    â–’â–’â–’â–’â–’                          \n");
+		printf("    â–’                              \n");
+		printf("    â–’â–’â–’â–’â–’                           \n");
 	}
 
 	int player_dead(int* ran, int* n, int heart_index, int* cursor1cx, int* cursor1cy)
@@ -576,10 +578,10 @@ public:
 		{
 			render.gotoxy(*cursor1cx, *cursor1cy);
 			if (heart_index == 1) {
-				LIGHT_GREEN printf("\a¿ô");
+				LIGHT_GREEN printf("\aì›ƒ");
 			}
 			else {
-				RED printf("\a¡Ø");
+				RED printf("\aâ€»");
 			}
 			return 1;
 		}
@@ -657,51 +659,51 @@ public:
 			render.gotoxy(20, 17);
 			if (game_source1.start_re == 0)
 			{
-				LIGHT_BLUE printf(" ½ÃÀÛÇÏ±â");
+				LIGHT_BLUE printf(" ì‹œì‘í•˜ê¸°");
 			}
 			else
 			{
-				RED printf(" ´Ù½ÃÇÏ±â");
+				RED printf(" ë‹¤ì‹œí•˜ê¸°");
 			}
 
-			BLUE render.printAt("³­ÀÌµµ ¼³Á¤", 20, 20);
-			YELLOW render.printAt("  ³¡³»±â", 20, 23);
+			BLUE render.printAt("ë‚œì´ë„ ì„¤ì •", 20, 20);
+			YELLOW render.printAt("  ëë‚´ê¸°", 20, 23);
 
 
 			while (1)
 			{
 				WHITE;
-				render.printAt("¢¹", 16, cursor1.by);
-				render.printAt("¢·", 32, cursor1.by);
+				render.printAt("â–·", 16, cursor1.by);
+				render.printAt("â—", 32, cursor1.by);
 				move_menu(&cursor1.by, &game_source1.menu_change, &game_source1.score, &game_source1.score_ptf, &game_source1.begin_menu, &game_source1.diff);
 
-				if (game_source1.menu_change == 1)//³­ÀÌµµ ¼³Á¤ ´­·¶À»½Ã 
+				if (game_source1.menu_change == 1)//ë‚œì´ë„ ì„¤ì • ëˆŒë €ì„ì‹œ 
 				{
 					system("cls");
 					break;
 				}
-				else if (game_source1.begin_menu == 1)//½ÃÀÛÇÏ±â ´­·¶À»½Ã 
+				else if (game_source1.begin_menu == 1)//ì‹œì‘í•˜ê¸° ëˆŒë €ì„ì‹œ 
 					break;
 
 			}
 
 
-			if (game_source1.menu_change == 1)//³­ÀÌµµ ¼³Á¤ ´­·¶À»½Ã
+			if (game_source1.menu_change == 1)//ë‚œì´ë„ ì„¤ì • ëˆŒë €ì„ì‹œ
 			{
 				menu();
 				gotoxy(20, 17);
-				GRAY printf("   ÃÊ±Ş");
+				GRAY printf("   ì´ˆê¸‰");
 				gotoxy(20, 20);
-				DARK_YELLOW printf("   Áß±Ş");
+				DARK_YELLOW printf("   ì¤‘ê¸‰");
 				gotoxy(20, 23);
-				BLOOD printf("   °í±Ş");
+				BLOOD printf("   ê³ ê¸‰");
 				WHITE
 					cursor1.by = cursor1.by_last;
 
 				gotoxy(16, cursor1.by);
-				printf("¢¹");
+				printf("â–·");
 				gotoxy(32, cursor1.by);
-				printf("¢·");
+				printf("â—");
 
 
 				while (1)
@@ -723,27 +725,27 @@ public:
 	}
 
 	void printSIdeInfo() {
-		/*¸ñÂ÷*/
+		/*ëª©ì°¨*/
 		gotoxy(28, 2);
-		PURPLE printf("³­ÀÌµµ : %s", game_source1.diff_ch);
+		PURPLE printf("ë‚œì´ë„ : %s", game_source1.diff_ch);
 		gotoxy(28, 6);
-		LIGHT_GREEN printf("Á¡¼ö : ");
+		LIGHT_GREEN printf("ì ìˆ˜ : ");
 		gotoxy(28, 8);
-		RED printf("¸ñ¼û : ");
+		RED printf("ëª©ìˆ¨ : ");
 		gotoxy(28, 9);
-		BLUE printf("½Â¸® Á¶°Ç :");
+		BLUE printf("ìŠ¹ë¦¬ ì¡°ê±´ :");
 		gotoxy(40, 9);
-		printf("%dÁ¡", game_source1.score_ptf);
+		printf("%dì ", game_source1.score_ptf);
 		gotoxy(28, 11);
-		GRAY printf(" Á¶ÀÛÅ°");
+		GRAY printf(" ì¡°ì‘í‚¤");
 		gotoxy(28, 13);
-		printf(" ¡ç  ¡æ");
+		printf(" â†  â†’");
 	}
 	void win() {
 		gotoxy(5, 10);
-		BLUE printf("  °ÔÀÓ ½Â¸®");
+		BLUE printf("  ê²Œì„ ìŠ¹ë¦¬");
 		gotoxy(5, 11);
-		printf("ESC - µ¹¾Æ°¡±â");
+		printf("ESC - ëŒì•„ê°€ê¸°");
 
 		do
 		{
@@ -754,9 +756,9 @@ public:
 	}
 	void lose(){
 		gotoxy(5, 10);
-		RED printf("  °ÔÀÓ ¿À¹ö");
+		RED printf("  ê²Œì„ ì˜¤ë²„");
 		gotoxy(5, 11);
-		printf("ESC - µ¹¾Æ°¡±â");
+		printf("ESC - ëŒì•„ê°€ê¸°");
 		do
 		{
 			kb1 = _getch();
@@ -832,10 +834,10 @@ public:
 		do
 		{
 			razer_ran = rand() % 19 + 2;
-		} while ((razer_ran % 2 == 0 ? 1 : 0) == 0);//È¦¼ö°¡ ³ª¿À¸é ³×¸ğ Å×µÎ¸®Ä­ÀÌ¶û ¶ËÄ­ÀÌ¶û ¸ÂÁú ¾ÊÀ¸´Ï Â¦¼ö·Î ¼³Á¤
+		} while ((razer_ran % 2 == 0 ? 1 : 0) == 0);//í™€ìˆ˜ê°€ ë‚˜ì˜¤ë©´ ë„¤ëª¨ í…Œë‘ë¦¬ì¹¸ì´ë‘ ë˜¥ì¹¸ì´ë‘ ë§ì§ˆ ì•Šìœ¼ë‹ˆ ì§ìˆ˜ë¡œ ì„¤ì •
 
 
-		/*ÃÖÃÊ ·£´ı  ÃÊ±âÈ­*/
+		/*ìµœì´ˆ ëœë¤  ì´ˆê¸°í™”*/
 
 		for (int i = 0; i < 20; i++)
 		{
@@ -843,34 +845,34 @@ public:
 			{
 				ran[i] = rand() % 19 + 2;
 
-			} while ((ran[i] % 2 == 0 ? 1 : 0) == 0);//È¦¼ö°¡ ³ª¿À¸é ³×¸ğ Å×µÎ¸®Ä­ÀÌ¶û ¶ËÄ­ÀÌ¶û ¸ÂÁú ¾ÊÀ¸´Ï Â¦¼ö·Î ¼³Á¤ 
+			} while ((ran[i] % 2 == 0 ? 1 : 0) == 0);//í™€ìˆ˜ê°€ ë‚˜ì˜¤ë©´ ë„¤ëª¨ í…Œë‘ë¦¬ì¹¸ì´ë‘ ë˜¥ì¹¸ì´ë‘ ë§ì§ˆ ì•Šìœ¼ë‹ˆ ì§ìˆ˜ë¡œ ì„¤ì • 
 		}
 	}
 	void difficultSet() {
 		if (game_source1.diff == 0) {
 			sleep_num = 60;
-			strcpy(game_source1.diff_ch, "ÃÊ±Ş");
+			strcpy(game_source1.diff_ch, "ì´ˆê¸‰");
 		}
 		else if (game_source1.diff == 1) {
 			sleep_num = 40;
-			strcpy(game_source1.diff_ch, "Áß±Ş");
+			strcpy(game_source1.diff_ch, "ì¤‘ê¸‰");
 		}
 		else if (game_source1.diff == 2) {
 			sleep_num = 20;
-			strcpy(game_source1.diff_ch, "°í±Ş");
+			strcpy(game_source1.diff_ch, "ê³ ê¸‰");
 		}
 	}
 	void updatePlayer() {
 		gotoxy(cursor1.cx, cursor1.cy);
-		BLUE_GREEN printf("%s", "¿ô");
+		BLUE_GREEN printf("%s", "ì›ƒ");
 	}
 
 	void run() {
 		cursor1 = { 17,17,12,18 };
-		game_source1 = { 0,1000,0,5,0,0,0,"ÃÊ±Ş" };
+		game_source1 = { 0,1000,0,5,0,0,0,"ì´ˆê¸‰" };
 
 
-		system("title º° ÇÇÇÏ±â");
+		system("title ë³„ í”¼í•˜ê¸°");
 		system("mode con: cols=50 lines=27");
 
 		srand(time(NULL));
@@ -879,13 +881,13 @@ public:
 		{		
 			Menu();
 			initialize();
-			Player player1(16, 18, "¿Ê", 0x0009, 5);
-			Player player2(8, 18, "¿Ê", 0x000c, 5);
+			Player player1(16, 18, "ì˜·", 0x0009, 5);
+			Player player2(8, 18, "ì˜·", 0x000c, 5);
 
 			difficultSet();
 
 			gotoxy(0, 0);
-			map_ptf(0);//¸ÊÃâ·Â 
+			map_ptf(0);//ë§µì¶œë ¥ 
 
 			updatePlayer();
 
@@ -893,7 +895,7 @@ public:
 			printSIdeInfo();
 
 
-			/*°ÔÀÓ ½ÇÇàÁß*/
+			/*ê²Œì„ ì‹¤í–‰ì¤‘*/
 			for (currentTime = 1; ; currentTime++)
 			{
 				Sleep(sleep_num);
@@ -939,10 +941,10 @@ public:
 
 				updateGameSideInfo(player1);
 
-				if (game_source1.score > game_source1.score_ptf)//½Â¸®Á¶°Ç 
+				if (game_source1.score > game_source1.score_ptf)//ìŠ¹ë¦¬ì¡°ê±´ 
 					break;
 
-				else if (player1.getLife() == 0)//ÆĞ¹èÁ¶°Ç 
+				else if (player1.getLife() == 0)//íŒ¨ë°°ì¡°ê±´ 
 					break;
 
 			}
