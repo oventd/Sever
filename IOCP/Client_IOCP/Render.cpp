@@ -8,6 +8,7 @@ public:
 		Cur.Y = y;
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 	}
+
 	void setClear(int x, int y)
 	{
 		gotoxy(x, y);
@@ -19,7 +20,4 @@ public:
 		gotoxy(x, y);
 		printf(msg);
 	}
-
-
-
 };
